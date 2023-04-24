@@ -1,0 +1,35 @@
+environments:
+  local:
+
+releases:
+  - name: ui-nginx
+    labels:
+      app: ui-nginx
+    wait: true
+    chart: bitnami/nginx
+    version: 13.2.34
+    values:
+      - values-ui.yaml
+      - environments/{{ .Environment.Name }}/values-ui.yaml.gotmpl
+    # set:
+    #   - name: image.pullSecrets
+    #     values: 
+    #       - {{ env "DOCKER_NAME" }}
+    #   - name: image.pullCredentials.username
+    #     value: {{ env "DOCKER_USER" }}
+    #   - name: image.pullCredentials.password
+    #     value: {{ env "DOCKER_PASSWORD" }}
+      
+  # - name: api-python
+  #   labels:
+  #     app: api-python
+  #   wait: true
+  #   chart: bitnami/nginx
+  #   version: 1.0.0
+  #   values:
+  #     - deploy/environments/{{ .Environment.Name }}/values/values-api.yaml
+  #     - extraConfigMapEnvVars:
+  #         FLASK_ENV: ""
+  #         FLASK_RUN_HOST: ""
+  #         FLASK_RUN_PORT: ""
+  #         FLASK_APP: ""
