@@ -2,12 +2,51 @@ environments:
   local:
 
 releases:
+  - name: postgresql
+    labels:
+      app: postgresql
+    wait: true
+    chart: bitnami/postgresql
+    version: 12.2.7
+    values:
+      - values-postgre.yaml
+      - environments/{{ .Environment.Name }}/values-postgre.yaml.gotmpl
+
+  # - name: s3
+  #   labels:
+  #     app: s3
+  #   wait: true
+  #   chart: ingress-nginx/ingress-nginx
+  #   version: 4.5.2
+  #   values:
+  #     - values-ingress.yaml
+
+  # - name: rabbitmq
+  #   labels:
+  #     app: rabbitmq
+  #   wait: true
+  #   chart: ingress-nginx/ingress-nginx
+  #   version: 4.5.2
+  #   values:
+  #     - values-ingress.yaml
+
+  - name: ingress-nginx
+    labels:
+      app: ingress-nginx
+    wait: true
+    chart: ingress-nginx/ingress-nginx
+    version: 4.5.2
+    values:
+      - values-ingress.yaml
+
   - name: ui-nginx
     labels:
       app: ui-nginx
     wait: true
     chart: bitnami/nginx
     version: 13.2.34
+    needs: 
+      - ingress-nginx
     values:
       - values-ui.yaml
       - environments/{{ .Environment.Name }}/values-ui.yaml.gotmpl
@@ -19,17 +58,4 @@ releases:
     #     value: {{ env "DOCKER_USER" }}
     #   - name: image.pullCredentials.password
     #     value: {{ env "DOCKER_PASSWORD" }}
-      
-  # - name: api-python
-  #   labels:
-  #     app: api-python
-  #   wait: true
-  #   chart: bitnami/nginx
-  #   version: 1.0.0
-  #   values:
-  #     - deploy/environments/{{ .Environment.Name }}/values/values-api.yaml
-  #     - extraConfigMapEnvVars:
-  #         FLASK_ENV: ""
-  #         FLASK_RUN_HOST: ""
-  #         FLASK_RUN_PORT: ""
-  #         FLASK_APP: ""
+    

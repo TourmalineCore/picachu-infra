@@ -1,0 +1,13 @@
+primary:
+    persistence:
+        storageClass: local-path
+        size: 5Gi
+readReplicas:
+    persistence:
+        storageClass: local-path
+        size: 5Gi
+primary:
+    service:
+        type: NodePort
+        nodePorts:
+            postgresql: 30100

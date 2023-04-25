@@ -1,4 +1,6 @@
 image:
+    tag: latest
+    
     pullSecrets: 
         - ui-nginx-docker-secret
     pullCredentials:
@@ -8,3 +10,10 @@ image:
 extraConfigMapEnvVars:
     ENV_KEY: {{ env "ENV_KEY" }}
     API_ROOT: {{ env "API_ROOT" }}
+
+ingress:
+    hostname: "localhost"
+
+    annotations: ""
+
+    tls: false
