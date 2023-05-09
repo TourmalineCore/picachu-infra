@@ -43,10 +43,10 @@ controller:
     https: 443
 
   # -- Will add custom configuration options to Nginx https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/
-  config: 
-    use-proxy-protocol: "true"
-    real-ip-header: proxy_protocol
-    set-real-ip-from: 10.0.0.0/24
+  # config: 
+  #   use-proxy-protocol: "true"
+  #   real-ip-header: proxy_protocol
+  #   set-real-ip-from: 10.0.0.0/24
 
   # -- Annotations to be added to the controller config configuration configmap.
   configAnnotations: {}
