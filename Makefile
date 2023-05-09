@@ -5,6 +5,10 @@ export
 MAKE=make
 ##@ Manage
 
+# curl -L -k -o hostctl_1.1.4_windows_64-bit.zip  https://github.com/guumaster/hostctl/releases/download/v1.1.4/hostctl_1.1.4_windows_64-bit.zip
+# unzip hostctl_1.1.4_windows_64-bit.zip -d hostctl
+# rm -rf hostctl
+
 ifeq ($(MAKELEVEL), 0)
 clone-repo: callback:=clone-repo
 clone-repo: ssh-agent-auth
@@ -51,21 +55,27 @@ install-dependency: ## install dependency
 	&& tar -xvzf helm-diff-windows.tgz \
 	&& cp -r diff $$(helm env | awk -F"[\"]+" '/HELM_PLUGINS=/{print $$2}')/ \
 	&& rm -r diff \
-	&& rm helm-diff-windows.tgz
+	&& rm helm-diff-windows.tgz \
+	&& curl -L -k -o hostctl_1.1.4_windows_64-bit.zip  https://github.com/guumaster/hostctl/releases/download/v1.1.4/hostctl_1.1.4_windows_64-bit.zip \
+	&& unzip hostctl_1.1.4_windows_64-bit.zip -d hostctl \
+	&& rm -r hostctl_1.1.4_windows_64-bit.zip
 
 uninstall-dependency: ## uninstall dependency
 	choco uninstall k3d \
 	&& choco uninstall kubernetes-helmfile \
 	&& choco uninstall kubernetes-cli \
 	&& rm -r $$(helm env | awk -F"[\"]+" '/HELM_PLUGINS=/{print $$2}') \
-	&& choco uninstall kubernetes-helm
+	&& choco uninstall kubernetes-helm \
+	&& rm -rf hostctl
 
 create-cluster: ## create cluster `picachu-local` inside docker
+	MSYS_NO_PATHCONV=1 cmd /c self-elevating.bat add domains picachu picachu.local.tourmalinecore.internal s3.picachu.local.tourmalinecore.internal s3-console.picachu.local.tourmalinecore.internal
 	k3d cluster create picachu-local --agents 1 --k3s-arg "--disable=traefik@server:0" --port "80:30080@loadbalancer" --port "443:30443@loadbalancer" --port "30100:30100@loadbalancer"
 	kubectl create namespace local
 	kubectl config set-context --current --namespace=local
 
 delete-cluster: ## delete cluster `picachu-local` from docker
+	MSYS_NO_PATHCONV=1 cmd /c self-elevating.bat remove picachu
 	k3d cluster delete picachu-local
 
 add-bitnami-repo:
