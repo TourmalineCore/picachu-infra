@@ -18,6 +18,6 @@ echo Arguments   : %*
 echo Working dir : %cd%
 echo.
 :: administrator commands here
-hostctl\hostctl.exe %*
+%*
 ::hostctl/hostctl.exe %*
 :: e.g., run shell as admin

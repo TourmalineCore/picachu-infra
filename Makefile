@@ -69,13 +69,13 @@ uninstall-dependency: ## uninstall dependency
 	&& rm -rf hostctl
 
 create-cluster: ## create cluster `picachu-local` inside docker
-	MSYS_NO_PATHCONV=1 cmd /c self-elevating.bat add domains picachu picachu.local.tourmalinecore.internal s3.picachu.local.tourmalinecore.internal s3-console.picachu.local.tourmalinecore.internal
+	MSYS_NO_PATHCONV=1 cmd /c self-elevating.bat hostctl/hostctl.exe add domains picachu picachu.local.tourmalinecore.internal s3.picachu.local.tourmalinecore.internal s3-console.picachu.local.tourmalinecore.internal
 	k3d cluster create picachu-local --agents 1 --k3s-arg "--disable=traefik@server:0" --port "80:30080@loadbalancer" --port "443:30443@loadbalancer" --port "30100:30100@loadbalancer"
 	kubectl create namespace local
 	kubectl config set-context --current --namespace=local
 
 delete-cluster: ## delete cluster `picachu-local` from docker
-	MSYS_NO_PATHCONV=1 cmd /c self-elevating.bat remove picachu
+	MSYS_NO_PATHCONV=1 cmd /c self-elevating.bat hostctl/hostctl.exe remove picachu
 	k3d cluster delete picachu-local
 
 add-bitnami-repo:
