@@ -1,0 +1,24 @@
+defaultBuckets: "picachu-public, picachu-private"
+
+provisioning:
+  enabled: true
+  users:
+    - username: test-username
+      password: test-password
+      disabled: false
+      policies:
+        - readwrite
+
+ingress:
+  enabled: true
+  ingressClassName: "nginx"
+  hostname: s3-console.picachu.local.tourmalinecore.internal
+  path: /
+apiIngress:
+  enabled: true
+  ingressClassName: "nginx"
+  hostname: s3.picachu.local.tourmalinecore.internal
+  path: /
+
+persistence:
+  size: 5Gi
