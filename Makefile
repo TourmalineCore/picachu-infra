@@ -70,7 +70,7 @@ uninstall-dependency: ## uninstall dependency
 
 create-cluster: ## create cluster `picachu-local` inside docker
 	MSYS_NO_PATHCONV=1 cmd /c self-elevating.bat hostctl/hostctl.exe add domains picachu picachu.local.tourmalinecore.internal s3.picachu.local.tourmalinecore.internal s3-console.picachu.local.tourmalinecore.internal
-	k3d cluster create picachu-local --agents 1 --k3s-arg "--disable=traefik@server:0" --port "80:30080@loadbalancer" --port "443:30443@loadbalancer" --port "30100:30100@loadbalancer"
+	k3d cluster create picachu-local --agents 1 --k3s-arg "--disable=traefik@server:0" --port "80:30080@loadbalancer" --port "443:30443@loadbalancer" --port "30100-30106:30100-30106@loadbalancer"
 	kubectl create namespace local
 	kubectl config set-context --current --namespace=local
 
@@ -81,10 +81,12 @@ delete-cluster: ## delete cluster `picachu-local` from docker
 add-bitnami-repo:
 	helm repo add bitnami https://charts.bitnami.com/bitnami
 	helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+	helm repo update
 
+# helmfile --environment local -f deploy/helmfile.yaml sync --concurrency 1
 local-deploy: add-bitnami-repo ## deploy all application inside k3s cluster
-	helmfile --environment local -f deploy/helmfile.yaml apply
-
+	helmfile --environment local -f deploy/helmfile.yaml sync
+	
 cleanup-local-deploy: ## cleanup k3s deployment
 	helmfile --environment local -f deploy/helmfile.yaml destroy
 
