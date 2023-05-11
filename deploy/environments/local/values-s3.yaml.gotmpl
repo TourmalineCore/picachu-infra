@@ -1,10 +1,14 @@
+auth:
+  rootUser: {{ env "MINIO_ROOT_USER" }}
+  rootPassword: {{ env "MINIO_ROOT_PASSWORD" }}
+
 defaultBuckets: "picachu-public, picachu-private"
 
 provisioning:
   enabled: true
   users:
-    - username: test-username
-      password: test-password
+    - username: {{ env "S3_ACCESS_KEY_ID" }}
+      password: {{ env "S3_SECRET_ACCESS_KEY" }}
       disabled: false
       policies:
         - readwrite
@@ -21,4 +25,4 @@ apiIngress:
   path: /
 
 persistence:
-  size: 5Gi
+  size: {{ env "S3_PV_SIZE" }}

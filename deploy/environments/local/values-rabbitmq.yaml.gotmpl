@@ -1,5 +1,5 @@
 auth:
-    username: admin
-    password: admin
+    username: {{ env "RABBITMQ_DEFAULT_USER" }}
+    password: {{ env "RABBITMQ_DEFAULT_PASS" }}
 persistence:
-    size: 5Gi
+    size: {{ env "RABBITMQ_PV_SIZE" }}

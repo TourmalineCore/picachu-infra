@@ -49,6 +49,7 @@ releases:
     version: 13.2.34
     needs: 
       - ingress-nginx
+      - api-python
     values:
       - values-ui.yaml
       - environments/{{ .Environment.Name }}/values-ui.yaml.gotmpl
