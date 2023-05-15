@@ -41,6 +41,7 @@ ssh-add-key:
 	echo $(SSH_AGENT_PID)
 	SSH_ASKPASS=./password-supplier.sh ssh-add -v $(SSH_KEY_PATH) <<< $(SSH_KEY_PASS)
 
+ifeq ($(OS),Windows_NT)
 install-dependency: ## install dependency
 	MSYS_NO_PATHCONV=1 cmd /c self-elevating.bat install.bat \
 	&& curl -L -k -o hostctl_1.1.4_windows_64-bit.zip  https://github.com/guumaster/hostctl/releases/download/v1.1.4/hostctl_1.1.4_windows_64-bit.zip \
@@ -53,15 +54,44 @@ uninstall-dependency: ## uninstall dependency
 	&& rm -rf hostctl \
 	&& MSYS_NO_PATHCONV=1 cmd /c self-elevating.bat uninstall.bat
 
-create-cluster: ## create cluster `picachu-local` inside docker
+add-host-domains:
 	MSYS_NO_PATHCONV=1 cmd /c self-elevating.bat hostctl/hostctl.exe add domains picachu picachu.local.tourmalinecore.internal s3.picachu.local.tourmalinecore.internal s3-console.picachu.local.tourmalinecore.internal
+
+remove-host-domains:
+	MSYS_NO_PATHCONV=1 cmd /c self-elevating.bat hostctl/hostctl.exe remove picachu
+else
+# https://stackoverflow.com/questions/714100/os-detecting-makefile check OS names in makefile
+install-dependency: ## install dependency
+	sudo brew install -f k3d --version=5.4.6 -y \
+	&& sudo brew install -f kubernetes-helm --version=3.11.2 -y \
+	&& sudo brew install -f kubernetes-cli --version=1.26.0 -y \
+	&& sudo brew install -f kubernetes-helmfile --version=0.144.0 -y \
+	&& sudo brew install -f k3d --version=5.4.6 -y \
+	&& helm plugin install https://github.com/databus23/helm-diff \
+	&& sudo brew install guumaster/tap/hostctl
+
+uninstall-dependency: ## uninstall dependency
+	rm -rf $$(helm env | awk -F"[\"]+" '/HELM_PLUGINS=/{print $$2}') \
+	&& sudo brew uninstall k3d -y \
+	&& sudo brew uninstall kubernetes-helmfile -y \
+	&& sudo brew uninstall kubernetes-cli  -y \
+	&& sudo brew uninstall kubernetes-helm -y \
+	&& sudo brew uninstall guumaster/tap/hostctl
+
+add-host-domains:
+	sudo hostctl add domains picachu picachu.local.tourmalinecore.internal s3.picachu.local.tourmalinecore.internal s3-console.picachu.local.tourmalinecore.internal
+
+remove-host-domains:
+	sudo hostctl remove picachu
+endif
+
+create-cluster: add-host-domains ## create cluster `picachu-local` inside docker
 	k3d cluster create picachu-local --agents 1 --k3s-arg "--disable=traefik@server:0" --port "80:30080@loadbalancer" --port "443:30443@loadbalancer" --port "30100-30106:30100-30106@loadbalancer"
 	kubectl create namespace local
 	kubectl config set-context --current --namespace=local
 	helm upgrade --install --namespace ingress-nginx --create-namespace --values deploy/values-ingress.yaml ingress-nginx ingress-nginx/ingress-nginx
 
-delete-cluster: ## delete cluster `picachu-local` from docker
-	MSYS_NO_PATHCONV=1 cmd /c self-elevating.bat hostctl/hostctl.exe remove picachu
+delete-cluster: remove-host-domains ## delete cluster `picachu-local` from docker
 	k3d cluster delete picachu-local
 
 add-bitnami-repo:
