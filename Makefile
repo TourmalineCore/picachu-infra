@@ -5,10 +5,6 @@ export
 MAKE=make
 ##@ Manage
 
-# curl -L -k -o hostctl_1.1.4_windows_64-bit.zip  https://github.com/guumaster/hostctl/releases/download/v1.1.4/hostctl_1.1.4_windows_64-bit.zip
-# unzip hostctl_1.1.4_windows_64-bit.zip -d hostctl
-# rm -rf hostctl
-
 ifeq ($(MAKELEVEL), 0)
 clone-repo: callback:=clone-repo
 clone-repo: ssh-agent-auth
@@ -46,33 +42,23 @@ ssh-add-key:
 	SSH_ASKPASS=./password-supplier.sh ssh-add -v $(SSH_KEY_PATH) <<< $(SSH_KEY_PASS)
 
 install-dependency: ## install dependency
-	choco install -f k3d --version=5.4.6 -y \
-	&& choco install -f kubernetes-cli --version=1.26.0 -y \
-	&& choco install -f kubernetes-helm --version=3.11.2 -y \
-	&& choco install -f kubernetes-helmfile --version=0.144.0 -y \
-	&& mkdir -p $$(helm env | awk -F"[\"]+" '/HELM_PLUGINS=/{print $$2}') \
-	&& curl -L -k -o helm-diff-windows.tgz https://github.com/databus23/helm-diff/releases/download/v3.1.3/helm-diff-windows.tgz \
-	&& tar -xvzf helm-diff-windows.tgz \
-	&& cp -r diff $$(helm env | awk -F"[\"]+" '/HELM_PLUGINS=/{print $$2}')/ \
-	&& rm -r diff \
-	&& rm helm-diff-windows.tgz \
+	MSYS_NO_PATHCONV=1 cmd /c self-elevating.bat install.bat \
 	&& curl -L -k -o hostctl_1.1.4_windows_64-bit.zip  https://github.com/guumaster/hostctl/releases/download/v1.1.4/hostctl_1.1.4_windows_64-bit.zip \
+	&& mkdir hostctl \
 	&& unzip hostctl_1.1.4_windows_64-bit.zip -d hostctl \
-	&& rm -r hostctl_1.1.4_windows_64-bit.zip
+	&& rm -r hostctl_1.1.4_windows_64-bit.zip \
 
 uninstall-dependency: ## uninstall dependency
-	choco uninstall k3d \
-	&& choco uninstall kubernetes-helmfile \
-	&& choco uninstall kubernetes-cli \
-	&& rm -r $$(helm env | awk -F"[\"]+" '/HELM_PLUGINS=/{print $$2}') \
-	&& choco uninstall kubernetes-helm \
-	&& rm -rf hostctl
+	rm -rf $$(helm env | awk -F"[\"]+" '/HELM_PLUGINS=/{print $$2}') \
+	&& rm -rf hostctl \
+	&& MSYS_NO_PATHCONV=1 cmd /c self-elevating.bat uninstall.bat
 
 create-cluster: ## create cluster `picachu-local` inside docker
 	MSYS_NO_PATHCONV=1 cmd /c self-elevating.bat hostctl/hostctl.exe add domains picachu picachu.local.tourmalinecore.internal s3.picachu.local.tourmalinecore.internal s3-console.picachu.local.tourmalinecore.internal
 	k3d cluster create picachu-local --agents 1 --k3s-arg "--disable=traefik@server:0" --port "80:30080@loadbalancer" --port "443:30443@loadbalancer" --port "30100-30106:30100-30106@loadbalancer"
 	kubectl create namespace local
 	kubectl config set-context --current --namespace=local
+	helm upgrade --install --namespace ingress-nginx --create-namespace --values deploy/values-ingress.yaml ingress-nginx ingress-nginx/ingress-nginx
 
 delete-cluster: ## delete cluster `picachu-local` from docker
 	MSYS_NO_PATHCONV=1 cmd /c self-elevating.bat hostctl/hostctl.exe remove picachu
@@ -83,10 +69,10 @@ add-bitnami-repo:
 	helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 	helm repo update
 
-# helmfile --environment local -f deploy/helmfile.yaml sync --concurrency 1
+# helmfile --environment local -f deploy/helmfile.yaml apply --concurrency 1
 local-deploy: add-bitnami-repo ## deploy all application inside k3s cluster
-	helmfile --environment local -f deploy/helmfile.yaml sync
-	
+	helmfile --environment local --namespace local -f deploy/helmfile.yaml sync
+
 cleanup-local-deploy: ## cleanup k3s deployment
 	helmfile --environment local -f deploy/helmfile.yaml destroy
 
