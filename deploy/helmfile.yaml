@@ -32,15 +32,6 @@ releases:
       - values-rabbitmq.yaml
       - environments/{{ .Environment.Name }}/values-rabbitmq.yaml.gotmpl
 
-  - name: ingress-nginx
-    labels:
-      app: ingress-nginx
-    wait: true
-    chart: ingress-nginx/ingress-nginx
-    version: 4.5.2
-    values:
-      - values-ingress.yaml
-
   - name: ui-nginx
     labels:
       app: ui-nginx
@@ -48,7 +39,6 @@ releases:
     chart: bitnami/nginx
     version: 13.2.34
     needs: 
-      - ingress-nginx
       - api-python
     values:
       - values-ui.yaml
@@ -61,19 +51,10 @@ releases:
     chart: bitnami/nginx
     version: 13.2.34
     needs: 
-      - ingress-nginx
       - rabbitmq
       - s3
       - postgresql
     values:
       - values-api.yaml
       - environments/{{ .Environment.Name }}/values-api.yaml.gotmpl
-    # set:
-    #   - name: image.pullSecrets
-    #     values: 
-    #       - {{ env "DOCKER_NAME" }}
-    #   - name: image.pullCredentials.username
-    #     value: {{ env "DOCKER_USER" }}
-    #   - name: image.pullCredentials.password
-    #     value: {{ env "DOCKER_PASSWORD" }}
     
