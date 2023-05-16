@@ -41,13 +41,14 @@ ssh-add-key:
 	echo $(SSH_AGENT_PID)
 	SSH_ASKPASS=./password-supplier.sh ssh-add -v $(SSH_KEY_PATH) <<< $(SSH_KEY_PASS)
 
+UNAME_S := $(shell uname -s)
 ifeq ($(OS),Windows_NT)
 install-dependency: ## install dependency
 	MSYS_NO_PATHCONV=1 cmd /c self-elevating.bat install.bat \
 	&& curl -L -k -o hostctl_1.1.4_windows_64-bit.zip  https://github.com/guumaster/hostctl/releases/download/v1.1.4/hostctl_1.1.4_windows_64-bit.zip \
 	&& mkdir hostctl \
 	&& unzip hostctl_1.1.4_windows_64-bit.zip -d hostctl \
-	&& rm -r hostctl_1.1.4_windows_64-bit.zip \
+	&& rm -rf hostctl_1.1.4_windows_64-bit.zip \
 
 uninstall-dependency: ## uninstall dependency
 	rm -rf $$(helm env | awk -F"[\"]+" '/HELM_PLUGINS=/{print $$2}') \
@@ -59,23 +60,23 @@ add-host-domains:
 
 remove-host-domains:
 	MSYS_NO_PATHCONV=1 cmd /c self-elevating.bat hostctl/hostctl.exe remove picachu
-else
+endif
+ifeq ($(UNAME_S),Darwin)
 # https://stackoverflow.com/questions/714100/os-detecting-makefile check OS names in makefile
 install-dependency: ## install dependency
-	sudo brew install -f k3d --version=5.4.6 -y \
-	&& sudo brew install -f kubernetes-helm --version=3.11.2 -y \
-	&& sudo brew install -f kubernetes-cli --version=1.26.0 -y \
-	&& sudo brew install -f kubernetes-helmfile --version=0.144.0 -y \
-	&& sudo brew install -f k3d --version=5.4.6 -y \
+	sudo brew install k3d \
+	&& sudo brew install helm \
+	&& sudo brew install kubernetes-cli \
+	&& sudo brew install helmfile \
 	&& helm plugin install https://github.com/databus23/helm-diff \
 	&& sudo brew install guumaster/tap/hostctl
 
 uninstall-dependency: ## uninstall dependency
 	rm -rf $$(helm env | awk -F"[\"]+" '/HELM_PLUGINS=/{print $$2}') \
-	&& sudo brew uninstall k3d -y \
-	&& sudo brew uninstall kubernetes-helmfile -y \
-	&& sudo brew uninstall kubernetes-cli  -y \
-	&& sudo brew uninstall kubernetes-helm -y \
+	&& sudo brew uninstall k3d \
+	&& sudo brew uninstall kubernetes-cli \
+	&& sudo brew uninstall helm \
+	&& sudo brew uninstall helmfile \
 	&& sudo brew uninstall guumaster/tap/hostctl
 
 add-host-domains:
@@ -85,7 +86,8 @@ remove-host-domains:
 	sudo hostctl remove picachu
 endif
 
-create-cluster: add-host-domains ## create cluster `picachu-local` inside docker
+
+create-cluster: add-host-domains add-bitnami-repo ## create cluster `picachu-local` inside docker
 	k3d cluster create picachu-local --agents 1 --k3s-arg "--disable=traefik@server:0" --port "80:30080@loadbalancer" --port "443:30443@loadbalancer" --port "30100-30106:30100-30106@loadbalancer"
 	kubectl create namespace local
 	kubectl config set-context --current --namespace=local
@@ -100,7 +102,7 @@ add-bitnami-repo:
 	helm repo update
 
 # helmfile --environment local -f deploy/helmfile.yaml apply --concurrency 1
-local-deploy: add-bitnami-repo ## deploy all application inside k3s cluster
+local-deploy: ## deploy all application inside k3s cluster
 	helmfile --environment local --namespace local -f deploy/helmfile.yaml sync
 
 cleanup-local-deploy: ## cleanup k3s deployment
