@@ -79,7 +79,7 @@ you can access to services through portforwarding or hostdomains
 | picachu-api-s3-console    | s3-console.picachu.local.tourmalinecore.internal |
 | picachu-api-s3            | s3.picachu.local.tourmalinecore.internal         |
 | picachu-api-postgres      | localhost:30100                                  |
-| picachu-api-rabbitmq      | localhost:30106                                  |
+| picachu-api-rabbitmq      | localhost:30104                                  |
 
 For now you also can clone/update api and ui repos through make in current folder.
 ```bash
