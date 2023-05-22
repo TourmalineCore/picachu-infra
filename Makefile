@@ -91,7 +91,6 @@ create-cluster: add-host-domains add-bitnami-repo ## create cluster `picachu-loc
 	k3d cluster create picachu-local --agents 1 --k3s-arg "--disable=traefik@server:0" --port "80:30080@loadbalancer" --port "443:30443@loadbalancer" --port "30100-30106:30100-30106@loadbalancer"
 	kubectl create namespace local
 	kubectl config set-context --current --namespace=local
-	helm upgrade --install --namespace ingress-nginx --create-namespace --values deploy/values-ingress.yaml ingress-nginx ingress-nginx/ingress-nginx
 
 delete-cluster: remove-host-domains ## delete cluster `picachu-local` from docker
 	k3d cluster delete picachu-local
