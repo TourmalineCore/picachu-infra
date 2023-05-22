@@ -1,0 +1,28 @@
+auth:
+  rootUser: {{ env "MINIO_ROOT_USER" }}
+  rootPassword: {{ env "MINIO_ROOT_PASSWORD" }}
+
+defaultBuckets: "picachu-public, picachu-private"
+
+provisioning:
+  enabled: true
+  users:
+    - username: {{ env "S3_ACCESS_KEY_ID" }}
+      password: {{ env "S3_SECRET_ACCESS_KEY" }}
+      disabled: false
+      policies:
+        - readwrite
+
+ingress:
+  enabled: true
+  ingressClassName: "nginx"
+  hostname: s3-console.picachu.local.tourmalinecore.internal
+  path: /
+apiIngress:
+  enabled: true
+  ingressClassName: "nginx"
+  hostname: s3.picachu.local.tourmalinecore.internal
+  path: /
+
+persistence:
+  size: {{ env "S3_PV_SIZE" }}

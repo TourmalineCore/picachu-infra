@@ -1,0 +1,69 @@
+environments:
+  local:
+
+releases:
+  - name: ingress-nginx
+    labels:
+      app: ingress-nginx
+    wait: true
+    chart: ingress-nginx/ingress-nginx
+    values:
+      - values-ingress.yaml
+
+  - name: postgresql
+    labels:
+      app: postgresql
+    wait: true
+    chart: bitnami/postgresql
+    version: 12.2.7
+    values:
+      - values-postgre.yaml
+      - environments/{{ .Environment.Name }}/values-postgre.yaml.gotmpl
+
+  - name: s3
+    labels:
+      app: s3
+    wait: true
+    chart: bitnami/minio
+    version: 12.2.4
+    values:
+      - values-s3.yaml
+      - environments/{{ .Environment.Name }}/values-s3.yaml.gotmpl
+
+  - name: rabbitmq
+    labels:
+      app: rabbitmq
+    wait: true
+    chart: bitnami/rabbitmq
+    version: 11.13.0
+    values:
+      - values-rabbitmq.yaml
+      - environments/{{ .Environment.Name }}/values-rabbitmq.yaml.gotmpl
+
+  - name: ui-nginx
+    labels:
+      app: ui-nginx
+    wait: true
+    chart: bitnami/nginx
+    version: 13.2.34
+    needs: 
+      - api-python
+    values:
+      - values-ui.yaml
+      - environments/{{ .Environment.Name }}/values-ui.yaml.gotmpl
+
+  - name: api-python
+    labels:
+      app: api-python
+    wait: true
+    chart: bitnami/nginx
+    version: 13.2.34
+    needs: 
+      - ingress-nginx
+      - rabbitmq
+      - s3
+      - postgresql
+    values:
+      - values-api.yaml
+      - environments/{{ .Environment.Name }}/values-api.yaml.gotmpl
+    

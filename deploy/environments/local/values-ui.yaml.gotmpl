@@ -1,0 +1,19 @@
+image:
+    tag: latest
+    
+    pullSecrets: 
+        - ui-nginx-docker-secret
+    pullCredentials:
+        username: {{ env "GITHUB_REGISTRY_USER" }}
+        password: {{ env "GITHUB_REGISTRY_PASSWORD" }}
+
+extraConfigMapEnvVars:
+    ENV_KEY: {{ env "ENV_KEY" }}
+    API_ROOT: {{ env "API_ROOT" }}
+
+ingress:
+    hostname: "picachu.local.tourmalinecore.internal"
+
+    annotations: ""
+
+    tls: false

@@ -1,0 +1,5 @@
+auth:
+    username: {{ env "RABBITMQ_DEFAULT_USER" }}
+    password: {{ env "RABBITMQ_DEFAULT_PASS" }}
+persistence:
+    size: {{ env "RABBITMQ_PV_SIZE" }}
