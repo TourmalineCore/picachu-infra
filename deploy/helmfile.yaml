@@ -2,6 +2,14 @@ environments:
   local:
 
 releases:
+  - name: ingress-nginx
+    labels:
+      app: ingress-nginx
+    wait: true
+    chart: ingress-nginx/ingress-nginx
+    values:
+      - values-ingress.yaml
+
   - name: postgresql
     labels:
       app: postgresql
@@ -51,6 +59,7 @@ releases:
     chart: bitnami/nginx
     version: 13.2.34
     needs: 
+      - ingress-nginx
       - rabbitmq
       - s3
       - postgresql
