@@ -1,5 +1,6 @@
 .DEFAULT_GOAL := help
 include .env
+include deploy.env
 export
 .EXPORT_ALL_VARIABLES:
 MAKE=make
@@ -42,7 +43,7 @@ ssh-add-key:
 	SSH_ASKPASS=./password-supplier.sh ssh-add -v $(SSH_KEY_PATH) <<< $(SSH_KEY_PASS)
 
 UNAME_S := $(shell uname -s)
-ifeq ($(OS),Windows_NT)
+ifeq ($(OS), Windows_NT)
 install-dependency: ## install dependency
 	MSYS_NO_PATHCONV=1 cmd /c self-elevating.bat install.bat \
 	&& curl -L -k -o hostctl_1.1.4_windows_64-bit.zip  https://github.com/guumaster/hostctl/releases/download/v1.1.4/hostctl_1.1.4_windows_64-bit.zip \
@@ -56,10 +57,10 @@ uninstall-dependency: ## uninstall dependency
 	&& MSYS_NO_PATHCONV=1 cmd /c self-elevating.bat uninstall.bat
 
 add-host-domains:
-	MSYS_NO_PATHCONV=1 cmd /c self-elevating.bat hostctl/hostctl.exe add domains picachu picachu.local.tourmalinecore.internal s3.picachu.local.tourmalinecore.internal s3-console.picachu.local.tourmalinecore.internal
+	MSYS_NO_PATHCONV=1 cmd /c self-elevating.bat hostctl\\hostctl.exe add domains picachu picachu.local.tourmalinecore.internal s3.picachu.local.tourmalinecore.internal s3-console.picachu.local.tourmalinecore.internal k3d-registry.picachu.local.tourmalinecore.internal
 
 remove-host-domains:
-	MSYS_NO_PATHCONV=1 cmd /c self-elevating.bat hostctl/hostctl.exe remove picachu
+	MSYS_NO_PATHCONV=1 cmd /c self-elevating.bat hostctl\\hostctl.exe remove picachu
 endif
 ifeq ($(UNAME_S),Darwin)
 # https://stackoverflow.com/questions/714100/os-detecting-makefile check OS names in makefile
@@ -80,7 +81,7 @@ uninstall-dependency: ## uninstall dependency
 	&& sudo brew uninstall guumaster/tap/hostctl
 
 add-host-domains:
-	sudo hostctl add domains picachu picachu.local.tourmalinecore.internal s3.picachu.local.tourmalinecore.internal s3-console.picachu.local.tourmalinecore.internal
+	sudo hostctl add domains picachu picachu.local.tourmalinecore.internal s3.picachu.local.tourmalinecore.internal s3-console.picachu.local.tourmalinecore.internal k3d-registry.picachu.local.tourmalinecore.internal
 
 remove-host-domains:
 	sudo hostctl remove picachu
@@ -88,12 +89,14 @@ endif
 
 
 create-cluster: add-host-domains add-bitnami-repo ## create cluster `picachu-local` inside docker
-	k3d cluster create picachu-local --agents 1 --k3s-arg "--disable=traefik@server:0" --port "80:30080@loadbalancer" --port "443:30443@loadbalancer" --port "30100-30106:30100-30106@loadbalancer"
+	k3d registry create registry.picachu.local.tourmalinecore.internal --port 12345
+	k3d cluster create picachu-local --agents 1 --k3s-arg "--disable=traefik@server:0" --port "80:30080@loadbalancer" --port "443:30443@loadbalancer" --port "30100-30106:30100-30106@loadbalancer" --registry-use k3d-registry.picachu.local.tourmalinecore.internal:12345
 	kubectl create namespace local
 	kubectl config set-context --current --namespace=local
 
 delete-cluster: remove-host-domains ## delete cluster `picachu-local` from docker
 	k3d cluster delete picachu-local
+	k3d registry delete registry.picachu.local.tourmalinecore.internal
 
 add-bitnami-repo:
 	helm repo add bitnami https://charts.bitnami.com/bitnami
@@ -106,6 +109,12 @@ local-deploy: ## deploy all application inside k3s cluster
 
 cleanup-local-deploy: ## cleanup k3s deployment
 	helmfile --environment local -f deploy/helmfile.yaml destroy
+
+docker-build-image:
+	docker build -t k3d-registry.picachu.local.tourmalinecore.internal:12345/picachu-api:local ./picachu-api-private
+
+docker-push-image:
+	docker push k3d-registry.picachu.local.tourmalinecore.internal:12345/picachu-api:local
 
 .PHONY: help
 help:
