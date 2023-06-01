@@ -1,5 +1,6 @@
 image:
-    {{ if eq (env "ENV_API") "local" }}
+
+    {{ if eq .Environment.Values.apiImageSource "local" }}
     registry: ""
     tag: local
     repository: k3d-registry.picachu.local.tourmalinecore.internal:12345/picachu-api

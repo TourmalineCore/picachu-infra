@@ -1,6 +1,7 @@
 environments:
   local:
-
+    values:
+    - values-image-source.yaml
 releases:
   # - name: ingress-nginx
   #   labels:
@@ -66,5 +67,6 @@ releases:
     #   - postgresql
     values:
       - values-api.yaml
+      - values-image-source.yaml
       - environments/{{ .Environment.Name }}/values-api.yaml.gotmpl
     
