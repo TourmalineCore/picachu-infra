@@ -2,7 +2,7 @@ auth:
   rootUser: {{ env "MINIO_ROOT_USER" }}
   rootPassword: {{ env "MINIO_ROOT_PASSWORD" }}
 
-defaultBuckets: "picachu-public, picachu-private"
+defaultBuckets: "tourmanique-public, tourmanique-private"
 
 provisioning:
   enabled: true
@@ -16,12 +16,12 @@ provisioning:
 ingress:
   enabled: true
   ingressClassName: "nginx"
-  hostname: s3-console.picachu.local.tourmalinecore.internal
+  hostname: s3-console.tourmanique.local.tourmalinecore.internal
   path: /
 apiIngress:
   enabled: true
   ingressClassName: "nginx"
-  hostname: s3.picachu.local.tourmalinecore.internal
+  hostname: s3.tourmanique.local.tourmalinecore.internal
   path: /
 
 persistence:

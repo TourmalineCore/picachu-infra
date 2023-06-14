@@ -12,7 +12,7 @@
 ##
 image:
   registry: ghcr.io
-  repository: tourmalinecore/picachu/ui
+  repository: tourmalinecore/tourmanique/ui
   tag: ""
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'

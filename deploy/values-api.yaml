@@ -15,7 +15,7 @@ nameOverride: "python"
 
 image:
   registry: ghcr.io
-  repository: tourmalinecore/picachu/api
+  repository: tourmalinecore/tourmanique/api
   tag: ""
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'

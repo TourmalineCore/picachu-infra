@@ -1,7 +1,7 @@
-# picachu-infra
+# tourmanique-infra
 
 ## Description
-A project about deploy picachu services in cluster
+A project about deploy tourmanique services in cluster
 
 ## Local development
 
@@ -74,12 +74,12 @@ you can access to services through portforwarding or hostdomains
 
 | Service                   | domain                                           |
 |---------------------------|--------------------------------------------------|
-| picachu-ui                | picachu.local.tourmalinecore.internal            |
-| picachu-api               | picachu.local.tourmalinecore.internal/api        |
-| picachu-api-s3-console    | s3-console.picachu.local.tourmalinecore.internal |
-| picachu-api-s3            | s3.picachu.local.tourmalinecore.internal         |
-| picachu-api-postgres      | localhost:30100                                  |
-| picachu-api-rabbitmq      | localhost:30104                                  |
+| tourmanique-ui                | tourmanique.local.tourmalinecore.internal            |
+| tourmanique-api               | tourmanique.local.tourmalinecore.internal/api        |
+| tourmanique-api-s3-console    | s3-console.tourmanique.local.tourmalinecore.internal |
+| tourmanique-api-s3            | s3.tourmanique.local.tourmalinecore.internal         |
+| tourmanique-api-postgres      | localhost:30100                                  |
+| tourmanique-api-rabbitmq      | localhost:30104                                  |
 
 For now you also can clone/update api and ui repos through make in current folder.
 ```bash

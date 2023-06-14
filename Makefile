@@ -17,12 +17,12 @@ update-repo: pre-git-target real-update-repo post-git-target ## update cloned re
 endif
 
 real-clone-repo:
-	if [ ! -d "../picachu-api-private" ] ; then git clone git@github.com:TourmalineCore/picachu-api-private.git ; fi
-	if [ ! -d "../picachu-ui" ] ; then git clone git@github.com:TourmalineCore/picachu-ui.git ; fi
+	if [ ! -d "../tourmanique-api-private" ] ; then git clone git@github.com:TourmalineCore/tourmanique-api-private.git ; fi
+	if [ ! -d "../tourmanique-ui" ] ; then git clone git@github.com:TourmalineCore/tourmanique-ui.git ; fi
 
 real-update-repo: 
-	cd ../picachu-api-private && git pull
-	cd ../picachu-ui && git pull
+	cd ../tourmanique-api-private && git pull
+	cd ../tourmanique-ui && git pull
 
 pre-git-target: ssh-add-key
 
@@ -56,10 +56,10 @@ uninstall-dependency: ## uninstall dependency
 	&& MSYS_NO_PATHCONV=1 cmd /c self-elevating.bat uninstall.bat
 
 add-host-domains:
-	MSYS_NO_PATHCONV=1 cmd /c self-elevating.bat hostctl/hostctl.exe add domains picachu picachu.local.tourmalinecore.internal s3.picachu.local.tourmalinecore.internal s3-console.picachu.local.tourmalinecore.internal
+	MSYS_NO_PATHCONV=1 cmd /c self-elevating.bat hostctl/hostctl.exe add domains tourmanique tourmanique.local.tourmalinecore.internal s3.tourmanique.local.tourmalinecore.internal s3-console.tourmanique.local.tourmalinecore.internal
 
 remove-host-domains:
-	MSYS_NO_PATHCONV=1 cmd /c self-elevating.bat hostctl/hostctl.exe remove picachu
+	MSYS_NO_PATHCONV=1 cmd /c self-elevating.bat hostctl/hostctl.exe remove tourmanique
 endif
 ifeq ($(UNAME_S),Darwin)
 # https://stackoverflow.com/questions/714100/os-detecting-makefile check OS names in makefile
@@ -80,20 +80,20 @@ uninstall-dependency: ## uninstall dependency
 	&& sudo brew uninstall guumaster/tap/hostctl
 
 add-host-domains:
-	sudo hostctl add domains picachu picachu.local.tourmalinecore.internal s3.picachu.local.tourmalinecore.internal s3-console.picachu.local.tourmalinecore.internal
+	sudo hostctl add domains tourmanique tourmanique.local.tourmalinecore.internal s3.tourmanique.local.tourmalinecore.internal s3-console.tourmanique.local.tourmalinecore.internal
 
 remove-host-domains:
-	sudo hostctl remove picachu
+	sudo hostctl remove tourmanique
 endif
 
 
-create-cluster: add-host-domains add-bitnami-repo ## create cluster `picachu-local` inside docker
-	k3d cluster create picachu-local --agents 1 --k3s-arg "--disable=traefik@server:0" --port "80:30080@loadbalancer" --port "443:30443@loadbalancer" --port "30100-30106:30100-30106@loadbalancer"
+create-cluster: add-host-domains add-bitnami-repo ## create cluster `tourmanique-local` inside docker
+	k3d cluster create tourmanique-local --agents 1 --k3s-arg "--disable=traefik@server:0" --port "80:30080@loadbalancer" --port "443:30443@loadbalancer" --port "30100-30106:30100-30106@loadbalancer"
 	kubectl create namespace local
 	kubectl config set-context --current --namespace=local
 
-delete-cluster: remove-host-domains ## delete cluster `picachu-local` from docker
-	k3d cluster delete picachu-local
+delete-cluster: remove-host-domains ## delete cluster `tourmanique-local` from docker
+	k3d cluster delete tourmanique-local
 
 add-bitnami-repo:
 	helm repo add bitnami https://charts.bitnami.com/bitnami
